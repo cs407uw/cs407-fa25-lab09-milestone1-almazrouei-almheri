@@ -29,23 +29,29 @@ class BallViewModel : ViewModel() {
     fun onSensorChanged(event: SensorEvent) {
         val currentTime = event.timestamp
 
-        // Skip first reading
         if (lastTimestamp == 0L) {
             lastTimestamp = currentTime
             return
         }
 
-        // Calculate time delta in seconds
         val deltaTime = (currentTime - lastTimestamp) / 1_000_000_000f
         lastTimestamp = currentTime
 
-        // Sensor X → Screen X (same direction)
-        // Sensor Y → Screen Y (opposite, so negate)
-        val accelX = event.values[0]
-        val accelY = -event.values[1]
+        val rawX = -event.values[0]
+        val rawY = event.values[1]
 
-        // Update ball physics
+        val gScreenX = -rawX
+        val gScreenY = rawY
+
+
+        val scale = 40f
+        val accelX = gScreenX * scale
+        val accelY = gScreenY * scale
+
         ball?.let {
+            val scale = 40f
+            val accelX = gScreenX * scale
+            val accelY = gScreenY * scale
             it.updatePositionAndVelocity(accelX, accelY, deltaTime)
             it.checkBoundaries()
             updateBallState()
